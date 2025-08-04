@@ -1,11 +1,11 @@
 ---
-title: "Proposal title"
+title: "Stock Market Analysis"
 subtitle: "Proposal"
 author: 
-  - name: "Team Name - Team member 1, Team member 2,..."
+  - name: "Matt Osterhoudt"
     affiliations:
       - name: "College of Information Science, University of Arizona"
-description: "Project description"
+description: "To be filled"
 format:
   html:
     code-tools: true
