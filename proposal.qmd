@@ -61,4 +61,4 @@ I have not fully decided which stock indexes, ETFs, or Large cap data to work wi
 
 ## Analysis plan
 
--   A plan for answering each of the questions including the variables involved, variables to be created (if any), external data to be merged in (if any).
+-   I plan to use stock data from 2000-2023, and predict the 2024 stock prices with the 3 models. Then, I will directly compare the predicted 2024 prices with the actual 2024 prices, and examine how well each model did with predictability. If necessary, I will also implement cross-validation to measure the effectiveness of each model, while interpreting the results of the best performing model.
