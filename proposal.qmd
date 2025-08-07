@@ -52,11 +52,12 @@ I have not fully decided which stock indexes, ETFs, or Large cap data to work wi
 
 ## Goal
 
--   The high-level goal for this project will be to implement a successful ARIMA, LSTM, and Prophet model to predict stock prices.
+-   The high-level goal for this project will be to implement a successful ARIMA, LSTM, and Prophet model to predict stock prices, and to determine which model performs the best.
 
 ## Goal Description & Motivation
 
--   
+-   In order to meet this goal, I plan to analyze at least 3 different stocks. So far, I plan to use indexes such as the S&P 500 and Schwab, which have been around for quite a while. I also plan to see if using a consistent, large cap stock such as Microsoft yields any predictive patterns. The three models I will be utilizing for this project is the ARIMA (Autoregressive Integrated Moving Average), LSTM (Long Short-Term Memory), and Prophet (Meta's time series forecasting model). I will explain the strengths/weaknesses of each in my write-up.
+-   My motivation is simply that I find stocks fascinating. I think it would be neat to test predictive models to see if there is any basis for quality stock prediction. I don't expect that my models will provide anything revolutionary; there are far better models out there that also utilize a lot more variables. Rather, I want to correctly implement the models and determine which model is the most effective. I hypothesize that large cap stocks like MSFT will have higher predictability with LSTM, whereas indexes that follow a more linear and season trend will have higher predictability with ARIMA.
 
 ## Analysis plan
 
