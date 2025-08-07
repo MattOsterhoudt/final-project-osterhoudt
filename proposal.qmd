@@ -62,3 +62,18 @@ I have not fully decided which stock indexes, ETFs, or Large cap data to work wi
 ## Analysis plan
 
 -   I plan to use stock data from 2000-2023, and predict the 2024 stock prices with the 3 models. Then, I will directly compare the predicted 2024 prices with the actual 2024 prices, and examine how well each model did with predictability. If necessary, I will also implement cross-validation to measure the effectiveness of each model, while interpreting the results of the best performing model.
+
+## Schedule by Due Date
+-   Proposal completion. 8/6/2025
+-   Implement peer review feedback. 8/8/2025
+-   Finalize which stock data to use, and begin Exploratory Data Analysis and cleanup. 8/12/2025
+-   Implement first model. 8/14/2025
+-   Implement second model. 8/15/2025
+-   Implement third model. 8/16/2025
+-   Analyze results and cross-correlate 8/18/2025
+-   Work on the write up and presentation 8/19/2025
+-   Polish and Finalize presentation 8/20/2025
+
+## Organization
+
+-   I have not created any additional folders as of 8/6/2025. I plan to edit and adjust my data folder once I have finalized which stock data to use.
