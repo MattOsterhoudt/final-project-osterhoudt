@@ -41,19 +41,22 @@ print(data1.to_string())
 ticker2 = yf.Ticker("SWPPX")
 data2 = ticker2.history(period = "max")
 print(data2.to_string())
+
 # Microsoft Stock. I wanted to include a consistent large cap stock
 ticker3 = yf.Ticker("MSFT")
 data3 = ticker3.history(period = "max")
 print(data3.to_string())
 ```
 
-I have not fully decided which stock indexes, ETFs, or Large cap data to work with yet, but above is a start. The code shown retrieves the stock data using the yfinance package, which helps retrieves Yahoo stock data. I plan to implement a cleaner csv format for the stock data later, but the only columns I would be taking are the date, opening price, and closing price. I plan to range the data from the year 2000-2023, and then use the models to predict 2024 prices. 
+I have not fully decided which stock indexes, ETFs, or Large cap data to work with yet, but above is a start. The code shown retrieves the stock data using the yfinance package, which helps retrieves Yahoo stock data. I plan to implement a cleaner csv format for the stock data later, but the only columns I would be taking are the date, opening price, closing price, and daily high/low. I plan to range the data from the year 2000-2023, and then use the models to predict 2024 prices. 
 
 ## Goal
 
-The high-level goal for this project will be to implement a successful ARIMA, LSTM, and Prophet model to predict stock prices
+-   The high-level goal for this project will be to implement a successful ARIMA, LSTM, and Prophet model to predict stock prices.
 
-## 
+## Goal Description & Motivation
+
+-   
 
 ## Analysis plan
 
