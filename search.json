@@ -25,7 +25,21 @@
     "href": "index.html#code-visual-analysis",
     "title": "Project Title",
     "section": "Code & Visual Analysis",
-    "text": "Code & Visual Analysis\n\n\n## Discussion\n\n## Conclusion\n\nAdd project abstract here.\n\n\n\n\n\n:::{#quarto-navigation-envelope .hidden}\n[Project Title]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1zaWRlYmFyLXRpdGxl\"}\n[Project Title]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXItdGl0bGU=\"}\n[Project]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6UHJvamVjdA==\"}\n[/index.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2luZGV4Lmh0bWw=\"}\n[Proposal]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6UHJvcG9zYWw=\"}\n[/proposal.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L3Byb3Bvc2FsLmh0bWw=\"}\n[Presentation]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6UHJlc2VudGF0aW9u\"}\n[/presentation.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L3ByZXNlbnRhdGlvbi5odG1s\"}\n[About]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6QWJvdXQ=\"}\n[/about.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2Fib3V0Lmh0bWw=\"}\n[https://github.com/MattOsterhoudt/final-project-osterhoudt]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6aHR0cHM6Ly9naXRodWIuY29tL01hdHRPc3RlcmhvdWR0L2ZpbmFsLXByb2plY3Qtb3N0ZXJob3VkdA==\"}\n:::\n\n\n\n:::{#quarto-meta-markdown .hidden}\n[Project Title]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW1ldGF0aXRsZQ==\"}\n[Project Title]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLXR3aXR0ZXJjYXJkdGl0bGU=\"}\n[Project Title]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW9nY2FyZHRpdGxl\"}\n[Project Title]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW1ldGFzaXRlbmFtZQ==\"}\n[Project description]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLXR3aXR0ZXJjYXJkZGVzYw==\"}\n[Project description]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW9nY2FyZGRkZXNj\"}\n:::\n\n\n\n\n&lt;!-- --&gt;\n\n::: {.quarto-embedded-source-code}\n```````````````````{.markdown shortcodes=\"false\"}\n---\ntitle: \"Project Title\"\nsubtitle: \"INFO 523 - Final Project\"\nauthor: \n  - name: \"Matt Osterhoudt\"\n    affiliations:\n      - name: \"College of Information Science, University of Arizona\"\ndescription: \"Project description\"\nformat:\n   html:\n    code-tools: true\n    code-overflow: wrap\n    embed-resources: true\neditor: visual\nexecute:\n  warning: false\n  echo: false\njupyter: python3\n---\n\n## Abstract\n\n## Introduction/Question\n\n## Approach\n\n## Code & Visual Analysis\n\nquarto-executable-code-5450563D\n\n```python\n#| label: load-packages\n#| include: false\n\n# Load packages here\nimport pandas as pd\nimport seaborn as sns\nimport yfinance as yf\n\n# S&P 500 Index Stock\nticker1 = yf.Ticker(\"INX\")\ndata1 = ticker1.history(period = \"max\")\ndata1 = data1.loc[\"2001-01-01\":\"2023-12-31\"]\ndata1.to_csv(\"data/sp500_2001_2023.csv\")\n#print(data1.to_string())\n\n# Schwab Index Stock\nticker2 = yf.Ticker(\"SWPPX\")\ndata2 = ticker2.history(period = \"max\")\ndata2 = data2.loc[\"2001-01-01\":\"2023-12-31\"]\ndata2.to_csv(\"data/swppx_2001_2023.csv\")\n#print(data2.to_string())\n\n# Microsoft Stock. I wanted to include a consistent large cap stock\nticker3 = yf.Ticker(\"MSFT\")\ndata3 = ticker3.history(period = \"max\")\ndata3 = data3.loc[\"2001-01-01\":\"2023-12-31\"]\ndata3.to_csv(\"data/msft_2001_2023.csv\")\n#print(data3.to_string())\n\n\n## Discussion\n\n## Conclusion\n\nAdd project abstract here.\n:::"
+    "text": "Code & Visual Analysis"
+  },
+  {
+    "objectID": "index.html#discussion",
+    "href": "index.html#discussion",
+    "title": "Project Title",
+    "section": "Discussion",
+    "text": "Discussion"
+  },
+  {
+    "objectID": "index.html#conclusion",
+    "href": "index.html#conclusion",
+    "title": "Project Title",
+    "section": "Conclusion",
+    "text": "Conclusion\nAdd project abstract here."
   },
   {
     "objectID": "proposal.html",
