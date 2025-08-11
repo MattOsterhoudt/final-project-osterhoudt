@@ -58,8 +58,6 @@ data3.to_csv("data/msft_2001_2023.csv")
 ```
 
 
-```
-
 
 ## Discussion
 
