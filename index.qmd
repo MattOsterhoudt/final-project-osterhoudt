@@ -34,27 +34,47 @@ jupyter: python3
 import pandas as pd
 import seaborn as sns
 import yfinance as yf
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
-# S&P 500 Index Stock
-ticker1 = yf.Ticker("INX")
+# SPY S&P 500 ETF Stock
+ticker1 = yf.Ticker("SPY")
 data1 = ticker1.history(period = "max")
-data1 = data1.loc["2001-01-01":"2023-12-31"]
-data1.to_csv("data/sp500_2001_2023.csv")
+data1 = data1.loc["2015-01-01":"2024-12-31"]
+data1.to_csv("data/spy_2015_2024.csv")
 #print(data1.to_string())
 
 # Schwab Index Stock
 ticker2 = yf.Ticker("SWPPX")
 data2 = ticker2.history(period = "max")
-data2 = data2.loc["2001-01-01":"2023-12-31"]
-data2.to_csv("data/swppx_2001_2023.csv")
+data2 = data2.loc["2015-01-01":"2024-12-31"]
+data2.to_csv("data/swppx_2015_2024.csv")
 #print(data2.to_string())
 
 # Microsoft Stock. I wanted to include a consistent large cap stock
 ticker3 = yf.Ticker("MSFT")
 data3 = ticker3.history(period = "max")
-data3 = data3.loc["2001-01-01":"2023-12-31"]
-data3.to_csv("data/msft_2001_2023.csv")
+data3 = data3.loc["2015-01-01":"2024-12-31"]
+data3.to_csv("data/msft_2015_2024.csv")
 #print(data3.to_string())
+data3.info()
+
+
+
+```
+
+```{python}
+#| label: load-packages
+#| include: false
+
+# Arima Model
+data3.info()
+
+msft_close = data1[["Close"]]
+
+msft_close.plot()
+
+
 ```
 
 
