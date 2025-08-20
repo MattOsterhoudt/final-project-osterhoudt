@@ -69,8 +69,6 @@ msft_close = data3[["Close"]]
 ```
 
 ```{python}
-#| label: load-packages
-#| include: false
 
 # ------MSFT Arima Model Section------
 
