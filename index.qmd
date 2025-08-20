@@ -34,8 +34,11 @@ jupyter: python3
 import pandas as pd
 import seaborn as sns
 import yfinance as yf
+import matplotlib.pyplot as plt
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.arima.model import ARIMA
+
 
 # SPY S&P 500 ETF Stock
 ticker1 = yf.Ticker("SPY")
@@ -67,13 +70,93 @@ data3.info()
 #| label: load-packages
 #| include: false
 
-# Arima Model
+# ------MSFT Arima Model Section------
+
 data3.info()
+msft_close = data3[["Close"]]
 
-msft_close = data1[["Close"]]
+# Setting a function for easier titling
+def add_title(ax, title):
+  ax.set_title(title)
 
-msft_close.plot()
+fig, ax1 = plt.subplots(figsize=(8, 5))
+msft_close.plot(ax = ax1)
+add_title(ax1, "MSFT Closing Price")
 
+n = int(len(msft_close) * 0.8)
+train_msft = msft_close.iloc[:n]
+test_msft = msft_close.iloc[n:]
+
+test_msft.info()
+
+# Manually check for stationarity
+
+# ACF and DACF Test
+fig, ax2 = plt.subplots(figsize = (8, 5))
+plot_acf(train_msft, ax = ax2)
+add_title(ax2, "ACF of MSFT Closing Price")
+
+fig, ax3 = plt.subplots(figsize = (8, 5))
+plot_pacf(train_msft, ax = ax3)
+add_title(ax3, "PACF of MSFT Closing Price")
+
+# ADF Test
+msft_adf_test = adfuller(train_msft["Close"])
+print(f'p-value pre-difference: {msft_adf_test[1]}')
+
+# Implement differencing
+train_msft_diff = train_msft.diff().dropna()
+
+fig, ax4 = plt.subplots(figsize = (8, 5))
+train_msft_diff.plot(ax = ax4)
+add_title(ax4, "Differenced MSFT Closing Price")
+
+# PACF/ACF Differenced Plots
+fig, ax5 = plt.subplots(figsize=(8, 5))
+plot_acf(train_msft_diff, ax = ax5)
+add_title(ax5, "ACF of Differenced MSFT")
+
+fig, ax6 = plt.subplots(figsize=(8, 5))
+plot_pacf(train_msft_diff, ax = ax6)
+add_title(ax6, "PACF of Differenced MSFT")
+
+# Data is now stationary after differencing, based on P-value
+msft_adf_test_diff = adfuller(train_msft_diff["Close"])
+print(f'p-value post-difference: {msft_adf_test_diff[1]}')
+
+msft_arima_model = ARIMA(train_msft["Close"], order = (9, 1, 9))
+msft_arima_result = msft_arima_model.fit()
+print(msft_arima_result.summary())
+
+msft_forecast_test = msft_arima_model_fit.forecast(len(test_msft)) 
+
+import matplotlib.pyplot as plt
+
+# Forecast values only
+forecast_mean = msft_arima_result.forecast(len(test_msft))
+forecast_mean.index = test_msft.index
+
+
+# Plot actual vs forecast
+fig, ax = plt.subplots(figsize=(10, 6))
+
+# Training data
+train_msft["Close"].plot(ax=ax, label="Train", color="blue")
+
+# Test data
+test_msft["Close"].plot(ax=ax, label="Test", color="green")
+
+# Forecasted values
+forecast_mean.plot(ax=ax, label="Forecast", color="red")
+
+ax.set_title("MSFT ARIMA Forecast vs Actual")
+ax.set_xlabel("Date")
+ax.set_ylabel("Price")
+ax.legend()
+
+plt.show()
+
+import pdmarima as pm
 
 ```
 
