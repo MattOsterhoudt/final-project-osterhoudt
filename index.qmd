@@ -1,5 +1,5 @@
 ---
-title: "Univariate Stock Predicionts: LSTM, ARIMA, and prophet"
+title: "Univariate Stock Predictions: LSTM, ARIMA, and prophet"
 subtitle: "INFO 523 - Final Project"
 author: 
   - name: "Matt Osterhoudt"
@@ -252,10 +252,6 @@ plt.show()
 # SWPPX ARIMA
 # ===============================
 
-# Setting a function for easier titling
-def add_title(ax, title):
-    ax.set_title(title)
-
 fig, ax1 = plt.subplots(figsize = (8, 5))
 swppx_close.plot(ax = ax1)
 add_title(ax1, "SWPPX Closing Price")
@@ -264,7 +260,7 @@ n = int(len(swppx_close) * 0.8)
 train_swppx = swppx_close.iloc[:n]
 test_swppx  = swppx_close.iloc[n:]
 
-test_swppx.info()
+#test_swppx.info()
 
 # Manually check for stationarity
 
