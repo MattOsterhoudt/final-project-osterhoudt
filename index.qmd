@@ -32,6 +32,7 @@ jupyter: python3
 
 # Load packages here
 import pandas as pd
+import numpy as np
 import seaborn as sns
 import yfinance as yf
 import matplotlib.pyplot as plt
@@ -46,6 +47,7 @@ data1 = ticker1.history(period = "max")
 data1 = data1.loc["2015-01-01":"2024-12-31"]
 data1.to_csv("data/spy_2015_2024.csv")
 #print(data1.to_string())
+spy_close = data1[["Close"]]
 
 # Schwab Index Stock
 ticker2 = yf.Ticker("SWPPX")
@@ -53,6 +55,7 @@ data2 = ticker2.history(period = "max")
 data2 = data2.loc["2015-01-01":"2024-12-31"]
 data2.to_csv("data/swppx_2015_2024.csv")
 #print(data2.to_string())
+swppx_close = data2[["Close"]]
 
 # Microsoft Stock. I wanted to include a consistent large cap stock
 ticker3 = yf.Ticker("MSFT")
@@ -61,8 +64,7 @@ data3 = data3.loc["2015-01-01":"2024-12-31"]
 data3.to_csv("data/msft_2015_2024.csv")
 #print(data3.to_string())
 data3.info()
-
-
+msft_close = data3[["Close"]]
 
 ```
 
@@ -73,7 +75,7 @@ data3.info()
 # ------MSFT Arima Model Section------
 
 data3.info()
-msft_close = data3[["Close"]]
+
 
 # Setting a function for easier titling
 def add_title(ax, title):
@@ -124,39 +126,233 @@ add_title(ax6, "PACF of Differenced MSFT")
 msft_adf_test_diff = adfuller(train_msft_diff["Close"])
 print(f'p-value post-difference: {msft_adf_test_diff[1]}')
 
-msft_arima_model = ARIMA(train_msft["Close"], order = (9, 1, 9))
+msft_arima_model = ARIMA(train_msft["Close"], order = (9, 1, 9), trend = 't')
 msft_arima_result = msft_arima_model.fit()
 print(msft_arima_result.summary())
 
-msft_forecast_test = msft_arima_model_fit.forecast(len(test_msft)) 
+msft_forecast_test = msft_arima_result.forecast(len(test_msft)) 
 
-import matplotlib.pyplot as plt
 
-# Forecast values only
-forecast_mean = msft_arima_result.forecast(len(test_msft))
-forecast_mean.index = test_msft.index
+# Prediction
+pred = msft_arima_result.predict(
+    start = len(train_msft),
+    end = len(train_msft) + len(test_msft) - 1,
+    dynamic = True  
+)
+
+# Align predicted index to test dates for plotting
+pred.index = test_msft.index
 
 
 # Plot actual vs forecast
-fig, ax = plt.subplots(figsize=(10, 6))
+fig, ax = plt.subplots(figsize = (8, 5))
 
 # Training data
-train_msft["Close"].plot(ax=ax, label="Train", color="blue")
+train_msft["Close"].plot(ax = ax, label = "Train", color="blue")
 
 # Test data
-test_msft["Close"].plot(ax=ax, label="Test", color="green")
+test_msft["Close"].plot(ax = ax, label = "Test", color="green")
 
 # Forecasted values
-forecast_mean.plot(ax=ax, label="Forecast", color="red")
+pred.plot(ax = ax, label = "Prediction", color = "red")
 
 ax.set_title("MSFT ARIMA Forecast vs Actual")
 ax.set_xlabel("Date")
-ax.set_ylabel("Price")
 ax.legend()
 
 plt.show()
 
-import pdmarima as pm
+
+```
+
+```{python}
+
+# LSTM Modeling
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import *
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.metrics import RootMeanSquaredError
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.models import load_model
+
+# ------- MSFT LSTM MODEL ------- #
+msft_close_data = msft_close.values  # Taking shape
+# This time, I am scaling the data
+scaler = MinMaxScaler(feature_range=(0, 1))
+scaled_msft_close = scaler.fit_transform(msft_close_data)
+
+# This function takes the data by intervals of 60, and converts it to supervised learning examples for later.
+def create_sequences(data, interval = 60):
+    X = []
+    y = []
+    for i in range(interval, len(data)):
+        X.append(data[i-interval:i, 0])
+        y.append(data[i, 0])
+    return np.array(X), np.array(y)
+
+interval = 60  # days of history per sample
+X_all, y_all = create_sequences(scaled_msft_close, interval)
+
+# Double checking the output
+X_all.view()
+y_all.view()
+
+# Usual 80/20 split
+n_train = int(len(X_all) * 0.8)
+X_train, X_test = X_all[:n_train], X_all[n_train:]
+y_train, y_test = y_all[:n_train], y_all[n_train:]
+
+# LSTM Tensorflow needs input in [samples, timesteps, features] form, so this code converts our 2d input into 3d. The final "1" is the new features dimension.
+X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
+X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
+
+# --- 2. Build LSTM model ---
+msft_lstm_model = Sequential()
+msft_lstm_model.add(InputLayer(input_shape = (interval, 1)))
+# Via online research as to what units to use 
+msft_lstm_model.add(LSTM(50))
+msft_lstm_model.add(Dropout(0.2))
+msft_lstm_model.add(Dense(8, "relu"))
+msft_lstm_model.add(Dense(1, "linear"))
+msft_lstm_model.summary()
+
+# This code will save the best model
+msft_cp = ModelCheckpoint("msft_lstm_model/.keras", save_best_only = True)
+
+# Builds model and tracks MSE, RMSE, and default value loss
+msft_lstm_model.compile(optimizer = "adam", loss = "mean_squared_error", metrics = [RootMeanSquaredError()])
+
+# Training model with 32 sequences and 20 epoch parameter.
+msft_lstm_model.fit(X_train, y_train, batch_size = 32, epochs = 20, validation_data = (X_test, y_test), callbacks = [msft_cp])
+
+# Loads best model for our plot later
+msft_lstm_model = load_model("msft_lstm_model/.keras")
+
+predictions = msft_lstm_model.predict(X_test)
+# Undoing the scaler
+predictions = scaler.inverse_transform(predictions.reshape(-1, 1))
+y_test_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
+
+# MSFT LSTM Plot
+train_dates = msft_close.index[interval:n_train + interval]
+test_dates = msft_close.index[n_train + interval:]
+
+fig, ax = plt.subplots(figsize = (8,5))
+ax.plot(test_dates, y_test_actual, label = "Actual", color = "green")
+ax.plot(test_dates, predictions, label = "Predicted", color = "red")
+ax.set_title("MSFT LSTM Prediction vs Actual")
+ax.set_xlabel("Date")
+ax.set_ylabel("Price")
+ax.legend()
+plt.show()
+
+
+# ===============================
+# SPY LSTM
+# ===============================
+
+spy_close_data = spy_close.values  # Taking shape
+scaler = MinMaxScaler(feature_range=(0, 1))
+scaled_spy_close = scaler.fit_transform(spy_close_data)
+
+X_all, y_all = create_sequences(scaled_spy_close, interval=60)
+
+X_all.view()
+y_all.view()
+
+n_train = int(len(X_all) * 0.8)
+X_train, X_test = X_all[:n_train], X_all[n_train:]
+y_train, y_test = y_all[:n_train], y_all[n_train:]
+
+X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
+X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
+
+spy_lstm_model = Sequential()
+spy_lstm_model.add(InputLayer(input_shape=(interval, 1)))
+spy_lstm_model.add(LSTM(50))
+spy_lstm_model.add(Dropout(0.2))
+spy_lstm_model.add(Dense(8, "relu"))
+spy_lstm_model.add(Dense(1, "linear"))
+spy_lstm_model.summary()
+
+spy_cp = ModelCheckpoint("spy_lstm_model/.keras", save_best_only=True)
+
+spy_lstm_model.compile(optimizer="adam", loss="mean_squared_error", metrics=[RootMeanSquaredError()])
+
+spy_lstm_model.fit(X_train, y_train, batch_size=32, epochs=20, validation_data=(X_test, y_test), callbacks=[spy_cp])
+
+spy_lstm_model = load_model("spy_lstm_model/.keras")
+
+predictions = spy_lstm_model.predict(X_test)
+predictions = scaler.inverse_transform(predictions.reshape(-1, 1))
+y_test_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
+
+train_dates = spy_close.index[interval:n_train + interval]
+test_dates = spy_close.index[n_train + interval:]
+
+fig, ax = plt.subplots(figsize=(8,5))
+ax.plot(test_dates, y_test_actual, label="Actual", color="green")
+ax.plot(test_dates, predictions, label="Predicted", color="red")
+ax.set_title("SPY LSTM Prediction vs Actual")
+ax.set_xlabel("Date")
+ax.set_ylabel("Price")
+ax.legend()
+plt.show()
+
+
+# ===============================
+# SWPPX LSTM
+# ===============================
+
+swppx_close_data = swppx_close.values  # Taking shape
+scaler = MinMaxScaler(feature_range=(0, 1))
+scaled_swppx_close = scaler.fit_transform(swppx_close_data)
+
+X_all, y_all = create_sequences(scaled_swppx_close, interval=60)
+
+X_all.view()
+y_all.view()
+
+n_train = int(len(X_all) * 0.8)
+X_train, X_test = X_all[:n_train], X_all[n_train:]
+y_train, y_test = y_all[:n_train], y_all[n_train:]
+
+X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
+X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
+
+swppx_lstm_model = Sequential()
+swppx_lstm_model.add(InputLayer(input_shape=(interval, 1)))
+swppx_lstm_model.add(LSTM(50))
+swppx_lstm_model.add(Dropout(0.2))
+swppx_lstm_model.add(Dense(8, "relu"))
+swppx_lstm_model.add(Dense(1, "linear"))
+swppx_lstm_model.summary()
+
+swppx_cp = ModelCheckpoint("swppx_lstm_model/.keras", save_best_only=True)
+
+swppx_lstm_model.compile(optimizer="adam", loss="mean_squared_error", metrics=[RootMeanSquaredError()])
+
+swppx_lstm_model.fit(X_train, y_train, batch_size=32, epochs=20, validation_data=(X_test, y_test), callbacks=[swppx_cp])
+
+swppx_lstm_model = load_model("swppx_lstm_model/.keras")
+
+predictions = swppx_lstm_model.predict(X_test)
+predictions = scaler.inverse_transform(predictions.reshape(-1, 1))
+y_test_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
+
+train_dates = swppx_close.index[interval:n_train + interval]
+test_dates = swppx_close.index[n_train + interval:]
+
+fig, ax = plt.subplots(figsize=(8,5))
+ax.plot(test_dates, y_test_actual, label="Actual", color="green")
+ax.plot(test_dates, predictions, label="Predicted", color="red")
+ax.set_title("SWPPX LSTM Prediction vs Actual")
+ax.set_xlabel("Date")
+ax.set_ylabel("Price")
+ax.legend()
+plt.show()
+
 
 ```
 
