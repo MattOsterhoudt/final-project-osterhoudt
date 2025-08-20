@@ -1,5 +1,5 @@
 ---
-title: "Project Title"
+title: "Univariate Stock Predicionts: LSTM, ARIMA, and prophet"
 subtitle: "INFO 523 - Final Project"
 author: 
   - name: "Matt Osterhoudt"
@@ -49,6 +49,8 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.metrics import RootMeanSquaredError
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.models import load_model
+import warnings
+warnings.filterwarnings('ignore')
 
 
 # SPY S&P 500 ETF Stock
@@ -82,11 +84,10 @@ msft_close = data3[["Close"]]
 #| echo: false
 #| warning: false
 #| message: false
-
-# ------MSFT Arima Model Section------
-
-data3.info()
-
+warnings.filterwarnings('ignore')
+# ===============================
+# MSFT ARIMA
+# ===============================
 
 # Setting a function for easier titling
 def add_title(ax, title):
@@ -170,6 +171,167 @@ pred.plot(ax = ax, label = "Prediction", color = "red")
 ax.set_title("MSFT ARIMA Forecast vs Actual")
 ax.set_xlabel("Date")
 ax.legend()
+plt.show()
+
+# ===============================
+# SPY ARIMA
+# ===============================
+
+fig, ax1 = plt.subplots(figsize = (8, 5))
+spy_close.plot(ax = ax1)
+add_title(ax1, "SPY Closing Price")
+
+n = int(len(spy_close) * 0.8)
+train_spy = spy_close.iloc[:n]
+test_spy = spy_close.iloc[n:]
+
+#test_spy.info()
+
+# Manually check for stationarity
+
+# ACF and PACF Test
+fig, ax2 = plt.subplots(figsize = (8, 5))
+plot_acf(train_spy, ax = ax2)
+add_title(ax2, "ACF of SPY Closing Price")
+
+fig, ax3 = plt.subplots(figsize = (8, 5))
+plot_pacf(train_spy, ax = ax3)
+add_title(ax3, "PACF of SPY Closing Price")
+
+# ADF Test
+spy_adf_test = adfuller(train_spy["Close"])
+print(f'p-value pre-difference: {spy_adf_test[1]}')
+
+# Implement differencing
+train_spy_diff = train_spy.diff().dropna()
+
+fig, ax4 = plt.subplots(figsize = (8, 5))
+train_spy_diff.plot(ax = ax4)
+add_title(ax4, "Differenced SPY Closing Price")
+
+# PACF/ACF Differenced Plots
+fig, ax5 = plt.subplots(figsize = (8, 5))
+plot_acf(train_spy_diff, ax = ax5)
+add_title(ax5, "ACF of Differenced SPY")
+
+fig, ax6 = plt.subplots(figsize = (8, 5))
+plot_pacf(train_spy_diff, ax = ax6)
+add_title(ax6, "PACF of Differenced SPY")
+
+# Data is now stationary after differencing, based on P-value
+spy_adf_test_diff = adfuller(train_spy_diff["Close"])
+print(f'p-value post-difference: {spy_adf_test_diff[1]}')
+
+spy_arima_model = ARIMA(train_spy["Close"], order = (9, 1, 6), trend = 't')
+spy_arima_result = spy_arima_model.fit()
+print(spy_arima_result.summary())
+
+spy_forecast_test = spy_arima_result.forecast(len(test_spy))
+
+# Prediction
+pred_spy = spy_arima_result.predict(
+    start = len(train_spy),
+    end = len(train_spy) + len(test_spy) - 1,
+    dynamic = True
+)
+
+# Align predicted index to test dates for plotting
+pred_spy.index = test_spy.index
+
+# Plot actual vs forecast
+fig, ax = plt.subplots(figsize=(8, 5))
+train_spy["Close"].plot(ax = ax, label = "Train", color = "blue")
+test_spy["Close"].plot(ax = ax, label = "Test", color = "green")
+pred_spy.plot(ax= ax, label = "Prediction", color = "red")
+ax.set_title("SPY ARIMA Forecast vs Actual")
+ax.set_xlabel("Date")
+ax.legend()
+plt.show()
+
+# ===============================
+# SWPPX ARIMA
+# ===============================
+
+# Setting a function for easier titling
+def add_title(ax, title):
+    ax.set_title(title)
+
+fig, ax1 = plt.subplots(figsize = (8, 5))
+swppx_close.plot(ax = ax1)
+add_title(ax1, "SWPPX Closing Price")
+
+n = int(len(swppx_close) * 0.8)
+train_swppx = swppx_close.iloc[:n]
+test_swppx  = swppx_close.iloc[n:]
+
+test_swppx.info()
+
+# Manually check for stationarity
+
+# ACF and PACF Test
+fig, ax2 = plt.subplots(figsize = (8, 5))
+plot_acf(train_swppx, ax = ax2)
+add_title(ax2, "ACF of SWPPX Closing Price")
+
+fig, ax3 = plt.subplots(figsize = (8, 5))
+plot_pacf(train_swppx, ax = ax3)
+add_title(ax3, "PACF of SWPPX Closing Price")
+
+# ADF Test
+swppx_adf_test = adfuller(train_swppx["Close"])
+print(f'p-value pre-difference: {swppx_adf_test[1]}')
+
+# Implement differencing
+train_swppx_diff = train_swppx.diff().dropna()
+
+fig, ax4 = plt.subplots(figsize = (8, 5))
+train_swppx_diff.plot(ax = ax4)
+add_title(ax4, "Differenced SWPPX Closing Price")
+
+# PACF/ACF Differenced Plots
+fig, ax5 = plt.subplots(figsize = (8, 5))
+plot_acf(train_swppx_diff, ax = ax5)
+add_title(ax5, "ACF of Differenced SWPPX")
+
+fig, ax6 = plt.subplots(figsize = (8, 5))
+plot_pacf(train_swppx_diff, ax = ax6)
+add_title(ax6, "PACF of Differenced SWPPX")
+
+# Data is now stationary after differencing, based on P-value
+swppx_adf_test_diff = adfuller(train_swppx_diff["Close"])
+print(f'p-value post-difference: {swppx_adf_test_diff[1]}')
+
+swppx_arima_model  = ARIMA(train_swppx["Close"], order = (2, 1, 2), trend = 't')
+swppx_arima_result = swppx_arima_model.fit()
+print(swppx_arima_result.summary())
+
+swppx_forecast_test = swppx_arima_result.forecast(len(test_swppx))
+
+# Prediction
+pred_swppx = swppx_arima_result.predict(
+    start   = len(train_swppx),
+    end     = len(train_swppx) + len(test_swppx) - 1,
+    dynamic = True
+)
+
+# Align predicted index to test dates for plotting
+pred_swppx.index = test_swppx.index
+
+# Plot actual vs forecast
+fig, ax = plt.subplots(figsize = (8, 5))
+
+# Training data
+train_swppx["Close"].plot(ax = ax, label = "Train", color = "blue")
+
+# Test data
+test_swppx["Close"].plot(ax = ax, label = "Test", color = "green")
+
+# Forecasted values
+pred_swppx.plot(ax = ax, label = "Prediction", color = "red")
+
+ax.set_title("SWPPX ARIMA Forecast vs Actual")
+ax.set_xlabel("Date")
+ax.legend()
 
 plt.show()
 
@@ -180,6 +342,7 @@ plt.show()
 #| echo: false
 #| warning: false
 #| message: false
+warnings.filterwarnings('ignore')
 
 # ===============================
 # MSFT LSTM
@@ -231,7 +394,7 @@ msft_cp = ModelCheckpoint("msft_lstm_model/.keras", save_best_only = True)
 msft_lstm_model.compile(optimizer = "adam", loss = "mean_squared_error", metrics = [RootMeanSquaredError()])
 
 # Training model with 32 sequences and 20 epoch parameter.
-msft_lstm_model.fit(X_train, y_train, batch_size = 32, epochs = 20, validation_data = (X_test, y_test), callbacks = [msft_cp])
+msft_lstm_model.fit(X_train, y_train, batch_size = 32, epochs = 20, validation_data = (X_test, y_test), callbacks = [msft_cp], verbose = 0)
 
 # Loads best model for our plot later
 msft_lstm_model = load_model("msft_lstm_model/.keras")
@@ -287,7 +450,7 @@ spy_cp = ModelCheckpoint("spy_lstm_model/.keras", save_best_only = True)
 
 spy_lstm_model.compile(optimizer = "adam", loss = "mean_squared_error", metrics = [RootMeanSquaredError()])
 
-spy_lstm_model.fit(X_train, y_train, batch_size=32, epochs = 20, validation_data = (X_test, y_test), callbacks = [spy_cp])
+spy_lstm_model.fit(X_train, y_train, batch_size=32, epochs = 20, validation_data = (X_test, y_test), callbacks = [spy_cp], verbose = 0)
 
 spy_lstm_model = load_model("spy_lstm_model/.keras")
 
@@ -340,7 +503,7 @@ swppx_cp = ModelCheckpoint("swppx_lstm_model/.keras", save_best_only = True)
 
 swppx_lstm_model.compile(optimizer = "adam", loss="mean_squared_error", metrics = [RootMeanSquaredError()])
 
-swppx_lstm_model.fit(X_train, y_train, batch_size = 32, epochs = 20, validation_data = (X_test, y_test), callbacks = [swppx_cp])
+swppx_lstm_model.fit(X_train, y_train, batch_size = 32, epochs = 20, validation_data = (X_test, y_test), callbacks = [swppx_cp], verbose = 0)
 
 swppx_lstm_model = load_model("swppx_lstm_model/.keras")
 
