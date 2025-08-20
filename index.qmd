@@ -51,6 +51,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.models import load_model
 import warnings
 warnings.filterwarnings('ignore')
+from prophet import Prophet
 
 
 # SPY S&P 500 ETF Stock
@@ -523,6 +524,174 @@ plt.show()
 ```
 
 
+
+
+```{python}
+#| include: false
+#| echo: false
+#| warning: false
+#| message: false
+
+warnings.simplefilter("ignore")
+
+# ============================
+# MSFT Prophet Forecast
+# ============================
+
+# Based on research, Prophet requires a dataframe with two columns: ds (datestamp) and y (numeric forecast measurement). Common naming conventions appear to be ds and y so I will keep that consistent.
+msft_prophet_data = msft_close.reset_index()
+
+# Ran into an error with the datetime format. Timezone must be removed.
+msft_prophet_data["Date"] = pd.to_datetime(msft_prophet_data["Date"]).dt.tz_localize(None)
+
+msft_prophet_data = msft_prophet_data[["Date", "Close"]].rename(columns = {"Date": "ds", "Close": "y"})
+msft_prophet_data.head()
+
+# Split to training and test again
+
+n = int(len(msft_prophet_data) * 0.9)
+train_msft_prophet = msft_prophet_data.iloc[:n]
+test_msft_prophet = msft_prophet_data.iloc[n:]
+
+# Setting the model parameters
+msft_proph_model = Prophet(
+  growth = "linear", 
+  yearly_seasonality = True,
+  weekly_seasonality = False,
+  daily_seasonality = False
+  )
+
+msft_proph_model.fit(train_msft_prophet)  
+
+# Dataframe for the forecasting
+future_msft_values = msft_proph_model.make_future_dataframe(periods = len(test_msft_prophet), freq = "B") # No weekends
+
+forecast_msft = msft_proph_model.predict(future_msft_values)
+forecast_msft.head()
+
+# Plotting the Prophet Model
+fig, ax = plt.subplots(figsize = (8, 5))
+ax.plot(train_msft_prophet["ds"], train_msft_prophet["y"], label = "Train", color = "blue")
+
+ax.plot(test_msft_prophet["ds"], test_msft_prophet["y"], label = "Test", color = "green")
+
+ax.plot(forecast_msft["ds"], forecast_msft["yhat"], label = "Prophet Prediction", color = "red")
+
+ax.set_title("MSFT Prophet Forecast vs Actual")
+ax.set_xlabel("Date")
+ax.legend()
+
+plt.show()
+
+fig = msft_proph_model.plot_components(forecast_msft)
+fig.suptitle("MSFT Prophet Components", y = 1.02)
+plt.show()
+
+# ============================
+# SWPPX Prophet Forecast
+# ============================
+
+swppx_prophet_data = swppx_close.reset_index()
+
+# Ran into an error with the datetime format. Timezone must be removed.
+swppx_prophet_data["Date"] = pd.to_datetime(swppx_prophet_data["Date"]).dt.tz_localize(None)
+
+swppx_prophet_data = swppx_prophet_data[["Date", "Close"]].rename(columns = {"Date": "ds", "Close": "y"})
+swppx_prophet_data.head()
+
+# Split to training and test again
+n = int(len(swppx_prophet_data) * 0.8)
+train_swppx_prophet = swppx_prophet_data.iloc[:n]
+test_swppx_prophet  = swppx_prophet_data.iloc[n:]
+
+# Setting the model parameters
+swppx_proph_model = Prophet(
+  growth = "linear", 
+  yearly_seasonality = True,
+  weekly_seasonality = False,
+  daily_seasonality = False
+  )
+
+swppx_proph_model.fit(train_swppx_prophet)  
+
+# Dataframe for the forecasting
+future_swppx_values = swppx_proph_model.make_future_dataframe(periods = len(test_swppx_prophet), freq = "B") # No weekends
+
+forecast_swppx = swppx_proph_model.predict(future_swppx_values)
+forecast_swppx.head()
+
+# Plotting the Prophet Model
+fig, ax = plt.subplots(figsize = (8, 5))
+ax.plot(train_swppx_prophet["ds"], train_swppx_prophet["y"], label = "Train", color = "blue")
+
+ax.plot(test_swppx_prophet["ds"], test_swppx_prophet["y"], label = "Test", color = "green")
+
+ax.plot(forecast_swppx["ds"], forecast_swppx["yhat"], label = "Prophet Prediction", color = "red")
+
+ax.set_title("SWPPX Prophet Forecast vs Actual")
+ax.set_xlabel("Date")
+ax.legend()
+
+plt.show()
+
+fig = swppx_proph_model.plot_components(forecast_swppx)
+fig.suptitle("SWPPX Prophet Components", y = 1.02)
+plt.show()
+
+
+# ============================
+# SPY Prophet Forecast
+# ============================
+
+spy_prophet_data = spy_close.reset_index()
+
+# Ran into an error with the datetime format. Timezone must be removed.
+spy_prophet_data["Date"] = pd.to_datetime(spy_prophet_data["Date"]).dt.tz_localize(None)
+
+spy_prophet_data = spy_prophet_data[["Date", "Close"]].rename(columns = {"Date": "ds", "Close": "y"})
+spy_prophet_data.head()
+
+# Split to training and test again
+n = int(len(spy_prophet_data) * 0.8)
+train_spy_prophet = spy_prophet_data.iloc[:n]
+test_spy_prophet  = spy_prophet_data.iloc[n:]
+
+# Setting the model parameters
+spy_proph_model = Prophet(
+  growth = "linear", 
+  yearly_seasonality = True,
+  weekly_seasonality = False,
+  daily_seasonality = False
+  )
+
+spy_proph_model.fit(train_spy_prophet)  
+
+# Dataframe for the forecasting
+future_spy_values = spy_proph_model.make_future_dataframe(periods = len(test_spy_prophet), freq = "B") # No weekends
+
+forecast_spy = spy_proph_model.predict(future_spy_values)
+forecast_spy.head()
+
+# Plotting the Prophet Model
+fig, ax = plt.subplots(figsize = (8, 5))
+ax.plot(train_spy_prophet["ds"], train_spy_prophet["y"], label = "Train", color = "blue")
+
+ax.plot(test_spy_prophet["ds"], test_spy_prophet["y"], label = "Test", color = "green")
+
+ax.plot(forecast_spy["ds"], forecast_spy["yhat"], label = "Prophet Prediction", color = "red")
+
+ax.set_title("SPY Prophet Forecast vs Actual")
+ax.set_xlabel("Date")
+ax.legend()
+
+plt.show()
+
+fig = spy_proph_model.plot_components(forecast_spy)
+fig.suptitle("SPY Prophet Components", y = 1.02)
+plt.show()
+
+
+```
 
 ## Discussion
 
