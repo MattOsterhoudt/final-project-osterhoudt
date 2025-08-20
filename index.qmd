@@ -29,6 +29,9 @@ jupyter: python3
 ```{python}
 #| label: load-packages
 #| include: false
+#| echo: false
+#| warning: false
+#| message: false
 
 # Load packages here
 import pandas as pd
@@ -39,6 +42,13 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.arima.model import ARIMA
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import *
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.metrics import RootMeanSquaredError
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.models import load_model
 
 
 # SPY S&P 500 ETF Stock
@@ -69,6 +79,9 @@ msft_close = data3[["Close"]]
 ```
 
 ```{python}
+#| echo: false
+#| warning: false
+#| message: false
 
 # ------MSFT Arima Model Section------
 
@@ -164,17 +177,13 @@ plt.show()
 ```
 
 ```{python}
+#| echo: false
+#| warning: false
+#| message: false
 
-# LSTM Modeling
-from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import *
-from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras.metrics import RootMeanSquaredError
-from tensorflow.keras.callbacks import ModelCheckpoint
-from tensorflow.keras.models import load_model
-
-# ------- MSFT LSTM MODEL ------- #
+# ===============================
+# MSFT LSTM
+# ===============================
 msft_close_data = msft_close.values  # Taking shape
 # This time, I am scaling the data
 scaler = MinMaxScaler(feature_range=(0, 1))
@@ -205,7 +214,7 @@ y_train, y_test = y_all[:n_train], y_all[n_train:]
 X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
 X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
 
-# --- 2. Build LSTM model ---
+# Building model with parameters
 msft_lstm_model = Sequential()
 msft_lstm_model.add(InputLayer(input_shape = (interval, 1)))
 # Via online research as to what units to use 
@@ -251,10 +260,10 @@ plt.show()
 # ===============================
 
 spy_close_data = spy_close.values  # Taking shape
-scaler = MinMaxScaler(feature_range=(0, 1))
+scaler = MinMaxScaler(feature_range = (0, 1))
 scaled_spy_close = scaler.fit_transform(spy_close_data)
 
-X_all, y_all = create_sequences(scaled_spy_close, interval=60)
+X_all, y_all = create_sequences(scaled_spy_close, interval = 60)
 
 X_all.view()
 y_all.view()
@@ -267,18 +276,18 @@ X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
 X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
 
 spy_lstm_model = Sequential()
-spy_lstm_model.add(InputLayer(input_shape=(interval, 1)))
+spy_lstm_model.add(InputLayer(input_shape = (interval, 1)))
 spy_lstm_model.add(LSTM(50))
 spy_lstm_model.add(Dropout(0.2))
 spy_lstm_model.add(Dense(8, "relu"))
 spy_lstm_model.add(Dense(1, "linear"))
 spy_lstm_model.summary()
 
-spy_cp = ModelCheckpoint("spy_lstm_model/.keras", save_best_only=True)
+spy_cp = ModelCheckpoint("spy_lstm_model/.keras", save_best_only = True)
 
-spy_lstm_model.compile(optimizer="adam", loss="mean_squared_error", metrics=[RootMeanSquaredError()])
+spy_lstm_model.compile(optimizer = "adam", loss = "mean_squared_error", metrics = [RootMeanSquaredError()])
 
-spy_lstm_model.fit(X_train, y_train, batch_size=32, epochs=20, validation_data=(X_test, y_test), callbacks=[spy_cp])
+spy_lstm_model.fit(X_train, y_train, batch_size=32, epochs = 20, validation_data = (X_test, y_test), callbacks = [spy_cp])
 
 spy_lstm_model = load_model("spy_lstm_model/.keras")
 
@@ -289,9 +298,9 @@ y_test_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
 train_dates = spy_close.index[interval:n_train + interval]
 test_dates = spy_close.index[n_train + interval:]
 
-fig, ax = plt.subplots(figsize=(8,5))
-ax.plot(test_dates, y_test_actual, label="Actual", color="green")
-ax.plot(test_dates, predictions, label="Predicted", color="red")
+fig, ax = plt.subplots(figsize = (8,5))
+ax.plot(test_dates, y_test_actual, label = "Actual", color = "green")
+ax.plot(test_dates, predictions, label = "Predicted", color = "red")
 ax.set_title("SPY LSTM Prediction vs Actual")
 ax.set_xlabel("Date")
 ax.set_ylabel("Price")
@@ -304,10 +313,10 @@ plt.show()
 # ===============================
 
 swppx_close_data = swppx_close.values  # Taking shape
-scaler = MinMaxScaler(feature_range=(0, 1))
+scaler = MinMaxScaler(feature_range = (0, 1))
 scaled_swppx_close = scaler.fit_transform(swppx_close_data)
 
-X_all, y_all = create_sequences(scaled_swppx_close, interval=60)
+X_all, y_all = create_sequences(scaled_swppx_close, interval = 60)
 
 X_all.view()
 y_all.view()
@@ -320,18 +329,18 @@ X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
 X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
 
 swppx_lstm_model = Sequential()
-swppx_lstm_model.add(InputLayer(input_shape=(interval, 1)))
+swppx_lstm_model.add(InputLayer(input_shape = (interval, 1)))
 swppx_lstm_model.add(LSTM(50))
 swppx_lstm_model.add(Dropout(0.2))
 swppx_lstm_model.add(Dense(8, "relu"))
 swppx_lstm_model.add(Dense(1, "linear"))
 swppx_lstm_model.summary()
 
-swppx_cp = ModelCheckpoint("swppx_lstm_model/.keras", save_best_only=True)
+swppx_cp = ModelCheckpoint("swppx_lstm_model/.keras", save_best_only = True)
 
-swppx_lstm_model.compile(optimizer="adam", loss="mean_squared_error", metrics=[RootMeanSquaredError()])
+swppx_lstm_model.compile(optimizer = "adam", loss="mean_squared_error", metrics = [RootMeanSquaredError()])
 
-swppx_lstm_model.fit(X_train, y_train, batch_size=32, epochs=20, validation_data=(X_test, y_test), callbacks=[swppx_cp])
+swppx_lstm_model.fit(X_train, y_train, batch_size = 32, epochs = 20, validation_data = (X_test, y_test), callbacks = [swppx_cp])
 
 swppx_lstm_model = load_model("swppx_lstm_model/.keras")
 
@@ -342,9 +351,9 @@ y_test_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
 train_dates = swppx_close.index[interval:n_train + interval]
 test_dates = swppx_close.index[n_train + interval:]
 
-fig, ax = plt.subplots(figsize=(8,5))
-ax.plot(test_dates, y_test_actual, label="Actual", color="green")
-ax.plot(test_dates, predictions, label="Predicted", color="red")
+fig, ax = plt.subplots(figsize = (8,5))
+ax.plot(test_dates, y_test_actual, label = "Actual", color = "green")
+ax.plot(test_dates, predictions, label = "Predicted", color = "red")
 ax.set_title("SWPPX LSTM Prediction vs Actual")
 ax.set_xlabel("Date")
 ax.set_ylabel("Price")
