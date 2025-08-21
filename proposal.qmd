@@ -61,7 +61,7 @@ I have not fully decided which stock indexes, ETFs, or Large cap data to work wi
 
 ## Analysis plan
 
--   I plan to use stock data from 2000-2023, and predict the 2024 stock prices with the 3 models. Then, I will directly compare the predicted 2024 prices with the actual 2024 prices, and examine how well each model did with predictability. If necessary, I will also implement cross-validation to measure the effectiveness of each model, while interpreting the results of the best performing model.
+-   Update: I plan to use stock data from 2015-2024, and split 80/20 into training and testing sets. Statistically, I will evaluate each model using R-squared, mean squared error, mean absolute error, and normalized mean squared error and normalized mean absolute error. Visually, I plan to compare how the predicted trend lines are plotted.
 
 ## Schedule by Due Date
 -   Proposal completion. 8/6/2025

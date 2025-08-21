@@ -19,8 +19,10 @@ jupyter: python3
 ---
 
 ## Abstract
+Time series models can be used to predict track stock data using historical closing values. Importing stock data from Yahoo Finance, we predict MSFT, SPY, and SWPPX by comparing three models: ARIMA (AutoRegressive Integrated Moving Average), LSTM (Long Short-Term Memory Neural Network), and Facebook Prophet. Each model has its strengths, but the LSTM model proved to be the most effective with a high R-squared value across the three stocks (average of .987). The LSTM model also boasted significantly lower Mean Squared Error and Mean Absolute Error when compared to ARIMA and Prophet. This performance conveys that LSTM may prove more effective for moderately long stock predictions and signifies the power of recurring neural networks.
 
 ## Introduction/Question
+Driving question: Which time series model (ARIMA, LSTM, or Prophet) is best for univariate (daily closing price) stock price prediction? This project aims to identify the most effective model using three different stock datasets. The stock data used will be MSFT (Microsoft), SPY (SPDR S&P 500 ETF Trust), and SWPPX (Schwab U.S. Large-Cap ETF). The data will range from the beginning of 2015 to the end of 2024. The only relevant variables used from the data will be the closing price and the date index. “Close” is the closing price of the stock per day. The date index will also be referred to in yyyy-mm-day format. By developing these models, our objective is to clarify which model can be utilized or recognized when it comes to predicting stock data.
 
 ## Approach
 
@@ -729,13 +731,13 @@ def eval_prophet(test_df, forecast_df, lab):
           f"MSE: {mse:} | MAE: {mae:} | R²: {r2:} | "
           f"NMSE: {nmse:} | NMAE: {nmae:}")
 
-eval_prophet(test_msft_prophet,  forecast_msft,  "MSFT")
-eval_prophet(test_swppx_prophet, forecast_swppx, "SWPPX")
-eval_prophet(test_spy_prophet,   forecast_spy,   "SPY")
+#eval_prophet(test_msft_prophet,  forecast_msft,  "MSFT")
+#eval_prophet(test_swppx_prophet, forecast_swppx, "SWPPX")
+#eval_prophet(test_spy_prophet,   forecast_spy,   "SPY")
 
 # Function for ARIMA testing
 def eval_arima(test_df, forecast_df, lab):
-   
+
     # Ensuring consistency across the forecasting models. Forecast is merged with the test set, and the models may store dates in different ways. This logic ensures that the alignment is consistent across the functions.
     if isinstance(forecast_df, pd.Series):
         forecast_df = forecast_df.to_frame(name = "yhat")
@@ -763,9 +765,9 @@ def eval_arima(test_df, forecast_df, lab):
           f"MSE: {mse:} | MAE: {mae:} | R²: {r2:} | "
           f"NMSE: {nmse:} | NMAE: {nmae:}")
 
-eval_arima(test_msft,  pred_msft,  "MSFT")
-eval_arima(test_swppx, pred_swppx, "SWPPX")
-eval_arima(test_spy,   pred_spy,   "SPY")
+#eval_arima(test_msft,  pred_msft,  "MSFT")
+#eval_arima(test_swppx, pred_swppx, "SWPPX")
+#eval_arima(test_spy,   pred_spy,   "SPY")
 
 
 # I did this function a little differently because I was running into issues... 
@@ -785,9 +787,9 @@ def eval_lstm(y_true, y_pred, lab):
           f"NMSE: {nmse:} | NMAE: {nmae:}")
 
 
-eval_lstm(y_test_actual, msft_predictions, "MSFT")
-eval_lstm(swppx_y_test_actual, swppx_predictions, "SWPPX")
-eval_lstm(spy_y_test_actual, spy_predictions, "SPY")
+#eval_lstm(y_test_actual, msft_predictions, "MSFT")
+#eval_lstm(swppx_y_test_actual, swppx_predictions, "SWPPX")
+#eval_lstm(spy_y_test_actual, spy_predictions, "SPY")
 
 ```
 
