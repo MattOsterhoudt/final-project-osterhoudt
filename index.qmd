@@ -52,6 +52,9 @@ from tensorflow.keras.models import load_model
 import warnings
 warnings.filterwarnings('ignore')
 from prophet import Prophet
+import statsmodels.api as sm
+import time
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 
 # SPY S&P 500 ETF Stock
@@ -147,14 +150,14 @@ msft_forecast_test = msft_arima_result.forecast(len(test_msft))
 
 
 # Prediction
-pred = msft_arima_result.predict(
+pred_msft = msft_arima_result.predict(
     start = len(train_msft),
     end = len(train_msft) + len(test_msft) - 1,
     dynamic = True  
 )
 
 # Align predicted index to test dates for plotting
-pred.index = test_msft.index
+pred_msft.index = test_msft.index
 
 
 # Plot actual vs forecast
@@ -167,7 +170,7 @@ train_msft["Close"].plot(ax = ax, label = "Train", color="blue")
 test_msft["Close"].plot(ax = ax, label = "Test", color="green")
 
 # Forecasted values
-pred.plot(ax = ax, label = "Prediction", color = "red")
+pred_msft.plot(ax = ax, label = "Prediction", color = "red")
 
 ax.set_title("MSFT ARIMA Forecast vs Actual")
 ax.set_xlabel("Date")
@@ -329,9 +332,7 @@ pred_swppx.plot(ax = ax, label = "Prediction", color = "red")
 ax.set_title("SWPPX ARIMA Forecast vs Actual")
 ax.set_xlabel("Date")
 ax.legend()
-
 plt.show()
-
 
 ```
 
@@ -396,24 +397,23 @@ msft_lstm_model.fit(X_train, y_train, batch_size = 32, epochs = 20, validation_d
 # Loads best model for our plot later
 msft_lstm_model = load_model("msft_lstm_model/.keras")
 
-predictions = msft_lstm_model.predict(X_test)
+msft_predictions = msft_lstm_model.predict(X_test)
 # Undoing the scaler
-predictions = scaler.inverse_transform(predictions.reshape(-1, 1))
+msft_predictions = scaler.inverse_transform(msft_predictions.reshape(-1, 1))
 y_test_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
 
 # MSFT LSTM Plot
-train_dates = msft_close.index[interval:n_train + interval]
-test_dates = msft_close.index[n_train + interval:]
+msft_train_dates = msft_close.index[interval:n_train + interval]
+msft_test_dates = msft_close.index[n_train + interval:]
 
 fig, ax = plt.subplots(figsize = (8,5))
-ax.plot(test_dates, y_test_actual, label = "Actual", color = "green")
-ax.plot(test_dates, predictions, label = "Predicted", color = "red")
+ax.plot(msft_test_dates, y_test_actual, label = "Actual", color = "green")
+ax.plot(msft_test_dates, msft_predictions, label = "Predicted", color = "red")
 ax.set_title("MSFT LSTM Prediction vs Actual")
 ax.set_xlabel("Date")
 ax.set_ylabel("Price")
 ax.legend()
 plt.show()
-
 
 # ===============================
 # SPY LSTM
@@ -451,23 +451,27 @@ spy_lstm_model.fit(X_train, y_train, batch_size=32, epochs = 20, validation_data
 
 spy_lstm_model = load_model("spy_lstm_model/.keras")
 
-predictions = spy_lstm_model.predict(X_test)
-predictions = scaler.inverse_transform(predictions.reshape(-1, 1))
-y_test_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
+spy_predictions = spy_lstm_model.predict(X_test)
+spy_predictions = scaler.inverse_transform(spy_predictions.reshape(-1, 1))
+spy_y_test_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
 
-train_dates = spy_close.index[interval:n_train + interval]
-test_dates = spy_close.index[n_train + interval:]
+spy_train_dates = spy_close.index[interval:n_train + interval]
+spy_test_dates = spy_close.index[n_train + interval:]
 
 fig, ax = plt.subplots(figsize = (8,5))
-ax.plot(test_dates, y_test_actual, label = "Actual", color = "green")
-ax.plot(test_dates, predictions, label = "Predicted", color = "red")
+ax.plot(spy_test_dates, spy_y_test_actual, label = "Actual", color = "green")
+ax.plot(spy_test_dates, spy_predictions, label = "Predicted", color = "red")
 ax.set_title("SPY LSTM Prediction vs Actual")
 ax.set_xlabel("Date")
 ax.set_ylabel("Price")
 ax.legend()
 plt.show()
 
-
+test_spy_lstm = pd.DataFrame({
+    "Date": spy_test_dates,
+    "Actual": spy_y_test_actual.flatten(),
+    "Predicted": spy_predictions.flatten()
+})
 # ===============================
 # SWPPX LSTM
 # ===============================
@@ -498,32 +502,36 @@ swppx_lstm_model.summary()
 
 swppx_cp = ModelCheckpoint("swppx_lstm_model/.keras", save_best_only = True)
 
-swppx_lstm_model.compile(optimizer = "adam", loss="mean_squared_error", metrics = [RootMeanSquaredError()])
+swppx_lstm_model.compile(optimizer = "adam", loss ="mean_squared_error", metrics = [RootMeanSquaredError()])
 
 swppx_lstm_model.fit(X_train, y_train, batch_size = 32, epochs = 20, validation_data = (X_test, y_test), callbacks = [swppx_cp], verbose = 0)
 
 swppx_lstm_model = load_model("swppx_lstm_model/.keras")
 
-predictions = swppx_lstm_model.predict(X_test)
-predictions = scaler.inverse_transform(predictions.reshape(-1, 1))
-y_test_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
+swppx_predictions = swppx_lstm_model.predict(X_test)
+swppx_predictions = scaler.inverse_transform(swppx_predictions.reshape(-1, 1))
+swppx_y_test_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
 
-train_dates = swppx_close.index[interval:n_train + interval]
-test_dates = swppx_close.index[n_train + interval:]
+
+
+swppx_train_dates = swppx_close.index[interval:n_train + interval]
+swppx_test_dates = swppx_close.index[n_train + interval:]
 
 fig, ax = plt.subplots(figsize = (8,5))
-ax.plot(test_dates, y_test_actual, label = "Actual", color = "green")
-ax.plot(test_dates, predictions, label = "Predicted", color = "red")
+ax.plot(swppx_test_dates, swppx_y_test_actual, label = "Actual", color = "green")
+ax.plot(swppx_test_dates, swppx_predictions, label = "Predicted", color = "red")
 ax.set_title("SWPPX LSTM Prediction vs Actual")
 ax.set_xlabel("Date")
 ax.set_ylabel("Price")
 ax.legend()
 plt.show()
 
-
+test_swppx_lstm = pd.DataFrame({
+    "Date": swppx_test_dates,
+    "Actual": swppx_y_test_actual.flatten(),
+    "Predicted": swppx_predictions.flatten()
+})
 ```
-
-
 
 
 ```{python}
@@ -693,8 +701,119 @@ plt.show()
 
 ```
 
+
+```{python}
+
+# Model Comparison
+
+# Defining a function to check the values. It was necessary to do a merge because of the inconsistent sizes.
+def eval_prophet(test_df, forecast_df, lab):
+  merged = pd.merge(
+    test_df[["ds", "y"]],
+    forecast_df[["ds", "yhat"]],
+    on = "ds",
+    how = "inner"
+  )
+
+  y_true = merged["y"].values
+  y_pred = merged["yhat"].values
+  mean_y = np.mean(y_true)
+
+  mse = mean_squared_error(y_true, y_pred)
+  mae = mean_absolute_error(y_true, y_pred)
+  r2 = r2_score(y_true, y_pred)
+  nmse = mse / mean_y
+  nmae = mae / mean_y
+
+  print(f"Prophet {lab}:  "
+          f"MSE: {mse:} | MAE: {mae:} | R²: {r2:} | "
+          f"NMSE: {nmse:} | NMAE: {nmae:}")
+
+eval_prophet(test_msft_prophet,  forecast_msft,  "MSFT")
+eval_prophet(test_swppx_prophet, forecast_swppx, "SWPPX")
+eval_prophet(test_spy_prophet,   forecast_spy,   "SPY")
+
+# Function for ARIMA testing
+def eval_arima(test_df, forecast_df, lab):
+   
+    # Ensuring consistency across the forecasting models. Forecast is merged with the test set, and the models may store dates in different ways. This logic ensures that the alignment is consistent across the functions.
+    if isinstance(forecast_df, pd.Series):
+        forecast_df = forecast_df.to_frame(name = "yhat")
+    else:
+        forecast_df = forecast_df.rename(columns = {forecast_df.columns[0]: "yhat"})
+    
+    merged = pd.merge(
+        test_df.reset_index()[["Date", "Close"]],
+        forecast_df.reset_index()[["Date", "yhat"]],
+        on = "Date",
+        how = "inner"
+    )
+
+    y_true = merged["Close"].values
+    y_pred = merged["yhat"].values
+    mean_y = np.mean(y_true)
+
+    mse = mean_squared_error(y_true, y_pred)
+    mae = mean_absolute_error(y_true, y_pred)
+    r2 = r2_score(y_true, y_pred)
+    nmse = mse / mean_y
+    nmae = mae / mean_y
+
+    print(f"ARIMA {lab}:  "
+          f"MSE: {mse:} | MAE: {mae:} | R²: {r2:} | "
+          f"NMSE: {nmse:} | NMAE: {nmae:}")
+
+eval_arima(test_msft,  pred_msft,  "MSFT")
+eval_arima(test_swppx, pred_swppx, "SWPPX")
+eval_arima(test_spy,   pred_spy,   "SPY")
+
+
+# I did this function a little differently because I was running into issues... 
+def eval_lstm(y_true, y_pred, lab):
+    # Flatten to 1D
+    y_true = y_true.flatten()
+    y_pred = y_pred.flatten()
+    
+    mse = mean_squared_error(y_true, y_pred)
+    mae = mean_absolute_error(y_true, y_pred)
+    r2 = r2_score(y_true, y_pred)
+    nmse = mse / np.var(y_true)     # variance-based
+    nmae = mae / np.mean(y_true)    # mean-based
+    
+    print(f"LSTM {lab}:  "
+          f"MSE: {mse:} | MAE: {mae:} | R²: {r2:} | "
+          f"NMSE: {nmse:} | NMAE: {nmae:}")
+
+
+eval_lstm(y_test_actual, msft_predictions, "MSFT")
+eval_lstm(swppx_y_test_actual, swppx_predictions, "SWPPX")
+eval_lstm(spy_y_test_actual, spy_predictions, "SPY")
+
+```
+
+| Stock   | Model   |     MSE    |   MAE    |    R²     |  NMSE   |  NMAE   |
+|---------|---------|------------|----------|-----------|---------|---------|
+| MSFT    | Prophet | 4591.333   | 65.959   | -12.971   | 11.021  | 0.158   |
+| MSFT    | ARIMA   | 13585.598  | 105.661  | -2.431    | 37.437  | 0.291   |
+| MSFT    | LSTM    | 63.961     | 6.459    | 0.982     | 0.018   | 0.018   |
+| SWPPX   | Prophet | 18.707     | 3.719    | -4.200    | 1.693   | 0.337   |
+| SWPPX   | ARIMA   | 8.303      | 2.365    | -1.056    | 0.742   | 0.211   |
+| SWPPX   | LSTM    | 0.033      | 0.132    | 0.992     | 0.008   | 0.012   |
+| SPY     | Prophet | 21337.151  | 122.298  | -4.163    | 45.381  | 0.260   |
+| SPY     | ARIMA   | 10072.653  | 84.816   | -1.219    | 21.212  | 0.179   |
+| SPY     | LSTM    | 63.426     | 6.268    | 0.986     | 0.014   | 0.013   |
+
+
+
+
+
+
 ## Discussion
+
+
 
 ## Conclusion
 
-Add project abstract here.
+
+
+
