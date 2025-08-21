@@ -1,5 +1,8 @@
 # Data
--   **[Stock market Data]**: [To be implemented] - This dataset will contain stock prices, volumes, daily highs/lows, and other relevant financial metrics for various stocks over a specified period. The data will be used to train and evaluate the predictive models. 
+-   Stock Market Data: This dataset will contain stock prices, volumes, daily highs/lows, and other relevant financial metrics for various stocks over a specified period. The data will be used to train and evaluate the predictive models. 
+
+There are 3 datasets available in this repository:
+msft_2015_2024, spy_2015_2024, and swppx_2015_2024. Each dataset contains stock market data for the respective company from 2015 to 2024. Each dataset contains the exact same variables, which are as follows:
 
 ## Variable Names and Descriptions:
 
