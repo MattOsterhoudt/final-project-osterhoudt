@@ -179,6 +179,7 @@ pred_msft.plot(ax = ax, label = "Prediction", color = "red")
 
 ax.set_title("MSFT ARIMA Forecast vs Actual")
 ax.set_xlabel("Date")
+ax.set_ylabel("Price")
 ax.legend()
 plt.show()
 
@@ -254,6 +255,7 @@ test_spy["Close"].plot(ax = ax, label = "Test", color = "green")
 pred_spy.plot(ax= ax, label = "Prediction", color = "red")
 ax.set_title("SPY ARIMA Forecast vs Actual")
 ax.set_xlabel("Date")
+ax.set_ylabel("Price")
 ax.legend()
 plt.show()
 
@@ -336,6 +338,7 @@ pred_swppx.plot(ax = ax, label = "Prediction", color = "red")
 
 ax.set_title("SWPPX ARIMA Forecast vs Actual")
 ax.set_xlabel("Date")
+ax.set_ylabel("Price")
 ax.legend()
 plt.show()
 
@@ -592,6 +595,7 @@ ax.plot(test_msft_prophet["ds"], test_msft_prophet["y"], label = "Test", color =
 ax.plot(forecast_msft["ds"], forecast_msft["yhat"], label = "Prophet Prediction", color = "red")
 
 ax.set_title("MSFT Prophet Forecast vs Actual")
+ax.set_ylabel("Price")
 ax.set_xlabel("Date")
 ax.legend()
 
@@ -644,6 +648,7 @@ ax.plot(forecast_swppx["ds"], forecast_swppx["yhat"], label = "Prophet Predictio
 
 ax.set_title("SWPPX Prophet Forecast vs Actual")
 ax.set_xlabel("Date")
+ax.set_ylabel("Price")
 ax.legend()
 plt.show()
 
@@ -695,6 +700,7 @@ ax.plot(forecast_spy["ds"], forecast_spy["yhat"], label = "Prophet Prediction", 
 
 ax.set_title("SPY Prophet Forecast vs Actual")
 ax.set_xlabel("Date")
+ax.set_ylabel("Price")
 ax.legend()
 plt.show()
 
