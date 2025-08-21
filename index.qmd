@@ -706,6 +706,7 @@ plt.show()
 ```
 
 ## Discussion & Model Comparison
+I computed the R-squared, Mean Squared Error (MSE), Mean Absolute Error(MAE), and the normalized MSE and MAR (NMAE and NMSE, respectively). As provided in the matrix below, these values reflect the statistical significance of the models. LSTM proved to be the most effective model, with very low NMSE, NMAE, MSE, and MAR values across all 3 stocks. It also had an R-squared value of almost 1.00 across the 3 stocks as well. Prophet and ARIMA both struggled to predict stock values in an effective way. They both had higher MSE and MAE values, and the R-squared across all stocks in both ARIMA and Prophet were negative. This implies that ARIMA may have struggled with nonstationarity (may be an oversight on my end) or seasonality, whereas Prophet may have failed due to overfitting of training or failure to capture market volatility.
 ```{python}
 
 # Model Comparison
